@@ -58,6 +58,11 @@ class RegisterViewModel : ViewModel() {
             _uiState.update { it.copy(currentStep = it.currentStep - 1) }
         }
     }
+
+    fun completeRegistration() {
+        // Aquí iría la lógica para registrar al usuario en tu backend
+        _uiState.update { it.copy(registrationCompleted = true) }
+    }
 }
 
 data class RegistrationUiState(
@@ -70,5 +75,6 @@ data class RegistrationUiState(
     val birthDate: String = "",
     val username: String = "",
     val profileImageUri: Uri? = null,
-    val termsAccepted: Boolean = false
+    val termsAccepted: Boolean = false,
+    val registrationCompleted: Boolean = false
 )

@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -81,46 +80,53 @@ fun RegisterScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = {
-                    if (uiState.currentStep > 1) {
-                        registerViewModel.previousStep()
-                    } else {
-                        navController.popBackStack()
+            if (!uiState.registrationCompleted) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(onClick = {
+                        if (uiState.currentStep > 1) {
+                            registerViewModel.previousStep()
+                        } else {
+                            navController.popBackStack()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back_arrow),
+                            contentDescription = "Back",
+                            tint = NeonGreen
+                        )
                     }
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_back_arrow),
-                        contentDescription = "Back",
-                        tint = NeonGreen
+                    Text(
+                        text = "REGISTRO",
+                        fontFamily = orbitron,
+                        color = NeonGreen,
+                        fontSize = 24.sp,
+                        textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.size(48.dp)) // Spacer to balance the IconButton
                 }
-                Text(
-                    text = "REGISTRO",
-                    fontFamily = orbitron,
-                    color = NeonGreen,
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.size(48.dp)) // Spacer to balance the IconButton
+                Spacer(modifier = Modifier.height(32.dp))
+                StepIndicator(currentStep = uiState.currentStep)
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            StepIndicator(currentStep = uiState.currentStep)
+
             Spacer(modifier = Modifier.height(32.dp))
 
-            when (uiState.currentStep) {
-                1 -> Step1Content(registerViewModel, uiState)
-                2 -> Step2Content(registerViewModel, uiState)
-                3 -> Step3Content(registerViewModel, uiState)
+            if (uiState.registrationCompleted) {
+                RegistrationCompletedContent(navController = navController)
+            } else {
+                when (uiState.currentStep) {
+                    1 -> Step1Content(registerViewModel, uiState)
+                    2 -> Step2Content(registerViewModel, uiState)
+                    3 -> Step3Content(registerViewModel, uiState)
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            if (uiState.currentStep < 3) {
+            if (uiState.currentStep < 3 && !uiState.registrationCompleted) {
                 Button(
                     onClick = { registerViewModel.nextStep() },
                     shape = RoundedCornerShape(50),
@@ -134,6 +140,31 @@ fun RegisterScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun RegistrationCompletedContent(navController: NavController) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "Usuario registrado correctamente.\nPresione siguiente para continuar.",
+            color = White,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp)
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = { navController.navigate("home") { popUpTo("welcome") } },
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(50.dp)
+        ) {
+            Text("Siguiente", fontSize = 18.sp, color = Black)
+            Icon(Icons.Default.ArrowForward, contentDescription = "Siguiente", tint = Black)
         }
     }
 }
@@ -402,7 +433,7 @@ fun Step3Content(viewModel: RegisterViewModel, uiState: RegistrationUiState) {
             Text("Términos y Condiciones del servicio", color = White)
         }
         Button(
-            onClick = { /* TODO: Finalizar registro */ },
+            onClick = { viewModel.completeRegistration() },
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = ElectricBlue),
             modifier = Modifier
@@ -412,7 +443,7 @@ fun Step3Content(viewModel: RegisterViewModel, uiState: RegistrationUiState) {
             Text("Registrar", fontSize = 18.sp, color = White)
         }
         Button(
-            onClick = { /* TODO: Omitir y finalizar */ },
+            onClick = { viewModel.completeRegistration() },
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = ElectricBlue),
             modifier = Modifier
