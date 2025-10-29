@@ -1,61 +1,43 @@
 package com.example.levelup_gamer.ui.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.levelup_gamer.data.models.Product
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class HomeUiState(
+    val products: List<Product> = emptyList(),
+    val categories: List<String> = emptyList(),
+    val searchQuery: String = ""
+)
 
 class HomeViewModel : ViewModel() {
-
-    private val database = Firebase.database
-    private val productsRef = database.getReference("products")
-
-    private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products: StateFlow<List<Product>> = _products
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState = _uiState.asStateFlow()
 
     init {
-        addProductsToDatabase() // Adds or updates products with image URLs
-        fetchProducts()
-    }
-
-    private fun fetchProducts() {
-        productsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val productList = snapshot.children.mapNotNull {
-                    it.getValue(Product::class.java)
-                }
-                _products.value = productList
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-            }
-        })
-    }
-
-    private fun addProductsToDatabase() {
         val productList = listOf(
-            Product("JM001", "Juegos de Mesa", "Catan", "$29.990 CLP", "https://cf.geekdo-images.com/W3_elpoQWH_buAcWgTuMAA__itemrep/img/SoOL_o0-Y54TFa3i1vC_9L0d92I=/fit-in/246x300/filters:strip_icc()/pic2419375.jpg"),
-            Product("JM002", "Juegos de Mesa", "Carcassonne", "$24.990 CLP", "https://cf.geekdo-images.com/okM0dq_bEXnbyQTOvHfwRA__itemrep/img/eX_2yV3b1R_pQy9T1iK3b37b1t0=/fit-in/246x300/filters:strip_icc()/pic6544250.jpg"),
-            Product("AC001", "Accesorios", "Controlador Inalámbrico Xbox Series X", "$59.990 CLP", "https://http2.mlstatic.com/D_NQ_NP_927393-MLA49924903739_052022-O.webp"),
-            Product("AC002", "Accesorios", "Auriculares Gamer HyperX Cloud II", "$79.990 CLP", "https://media.solotodo.com/media/products/129759_picture_1653327179.webp"),
-            Product("CO001", "Consolas", "PlayStation 5", "$549.990 CLP", "https://http2.mlstatic.com/D_NQ_NP_841787-MLA44484414455_012021-O.webp"),
-            Product("CG001", "Computadores Gamers", "PC Gamer ASUS ROG Strix", "$1.299.990 CLP", "https://www.paris.cl/dw/image/v2/BCHB_PRD/on/demandware.static/-/Sites-cencosud-master-catalog/default/dw3b3a6b57/images/hi-res/201042499-00001.jpg"),
-            Product("SG001", "Sillas Gamers", "Silla Gamer Secretlab Titan", "$349.990 CLP", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOahfE7aLT_32PA_b_h8i3v1A9_CHO-2Yl9A&s"),
-            Product("MS001", "Mouse", "Mouse Gamer Logitech G502 HERO", "$49.990 CLP", "https://media.solotodo.com/media/products/37459_picture_1583597036.webp"),
-            Product("MP001", "Mousepad", "Mousepad Razer Goliathus Extended Chroma", "$29.990 CLP", "https://http2.mlstatic.com/D_NQ_NP_821376-MLA48483864115_122021-O.webp"),
-            Product("PP001", "Poleras Personalizadas", "Polera Gamer Personalizada 'Level-Up'", "$14.990 CLP", "https://http2.mlstatic.com/D_NQ_NP_908581-MLC49925621815_052022-O.webp")
+            Product(id = "JM001", category = "Juegos de Mesa", name = "Catan", price = "29.990", description = "Un clásico juego de estrategia donde los jugadores compiten por colonizar y expandirse en la isla de Catan. Ideal para 3-4 jugadores y perfecto para noches de juego en familia o con amigos."),
+            Product(id = "JM002", category = "Juegos de Mesa", name = "Carcassonne", price = "24.990", description = "Un juego de colocación de fichas donde los jugadores construyen el paisaje alrededor de la fortaleza medieval de Carcassonne. Ideal para 2-5 jugadores y fácil de aprender."),
+            Product(id = "AC001", category = "Accesorios", name = "Controlador Inalámbrico Xbox Series X", price = "59.990", description = "Ofrece una experiencia de juego cómoda con botones mapeables y una respuesta táctil mejorada. Compatible con consolas Xbox y PC."),
+            Product(id = "AC002", category = "Accesorios", name = "Auriculares Gamer HyperX Cloud II", price = "79.990", description = "Proporcionan un sonido envolvente de calidad con un micrófono desmontable y almohadillas de espuma viscoelástica para mayor comodidad durante largas sesiones de juego."),
+            Product(id = "CO001", category = "Consolas", name = "PlayStation 5", price = "549.990", description = "La consola de última generación de Sony, que ofrece gráficos impresionantes y tiempos de carga ultrarrápidos para una experiencia de juego inmersiva."),
+            Product(id = "CG001", category = "Computadores Gamers", name = "PC Gamer ASUS ROG Strix", price = "1.299.990", description = "Un potente equipo diseñado para los gamers más exigentes, equipado con los últimos componentes para ofrecer un rendimiento excepcional en cualquier juego."),
+            Product(id = "SG001", category = "Sillas Gamers", name = "Silla Gamer Secretlab Titan", price = "349.990", description = "Diseñada para el máximo confort, esta silla ofrece un soporte ergonómico y personalización ajustable para sesiones de juego prolongadas."),
+            Product(id = "MS001", category = "Mouse", name = "Mouse Gamer Logitech G502 HERO", price = "49.990", description = "Con sensor de alta precisión y botones personalizables, este mouse es ideal para gamers que buscan un control preciso y personalización."),
+            Product(id = "MP001", category = "Mousepad", name = "Mousepad Razer Goliathus Extended Chroma", price = "29.990", description = "Ofrece un área de juego amplia con iluminación RGB personalizable, asegurando una superficie suave y uniforme para el movimiento del mouse."),
+            Product(id = "PP001", category = "Poleras Personalizadas", name = "Polera Gamer Personalizada 'Level-Up'", price = "14.990", description = "Una camiseta cómoda y estilizada, con la posibilidad de personalizarla con tu gamer tag o diseño favorito.")
         )
-
-        productList.forEach { product ->
-            productsRef.child(product.id).setValue(product)
+        _uiState.update {
+            it.copy(
+                products = productList,
+                categories = productList.map { product -> product.category }.distinct()
+            )
         }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
     }
 }
