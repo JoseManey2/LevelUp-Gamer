@@ -60,7 +60,6 @@ class RegisterViewModel : ViewModel() {
     }
 
     fun completeRegistration() {
-        // Aquí iría la lógica para registrar al usuario en tu backend
         _uiState.update { it.copy(registrationCompleted = true) }
     }
 }

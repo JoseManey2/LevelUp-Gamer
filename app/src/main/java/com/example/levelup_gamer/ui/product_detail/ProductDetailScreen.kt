@@ -15,6 +15,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -23,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,6 +47,7 @@ import com.example.levelup_gamer.ui.home.BottomNavigationBar
 import com.example.levelup_gamer.ui.theme.Black
 import com.example.levelup_gamer.ui.theme.ElectricBlue
 import com.example.levelup_gamer.ui.theme.NeonGreen
+import com.example.levelup_gamer.ui.theme.orbitron
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,11 +58,28 @@ fun ProductDetailScreen(
     val uiState by productDetailViewModel.uiState.collectAsState()
     val product = uiState.product
 
+    if (uiState.showAddedToCartPopup) {
+        AlertDialog(
+            onDismissRequest = { productDetailViewModel.dismissPopup() },
+            title = { Text("¡Éxito!") },
+            text = { Text("Producto añadido existosamente") },
+            confirmButton = {
+                TextButton(onClick = { productDetailViewModel.dismissPopup() }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+
     Scaffold(
         containerColor = Black,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { },
+                title = { 
+                    if (product != null) {
+                        Text(text = product.name, fontFamily = orbitron, color = NeonGreen)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(painterResource(id = R.drawable.ic_back_arrow), contentDescription = "Back", tint = NeonGreen)
@@ -76,7 +99,7 @@ fun ProductDetailScreen(
             )
         },
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(navController = navController)
         }
     ) { paddingValues ->
         if (product != null) {
@@ -105,11 +128,47 @@ fun ProductDetailScreen(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    if (product.discountedPrice != null) {
+                        Text(
+                            text = "${product.price}",
+                            color = Color.Gray,
+                            textDecoration = TextDecoration.LineThrough,
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                        Text(
+                            text = "${product.discountedPrice}",
+                            color = NeonGreen,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                    } else {
+                        Text(
+                            text = "${product.price}",
+                            color = NeonGreen,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = product.description,
                     color = Color.White,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { productDetailViewModel.addToCart() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
+                ) {
+                    Text("AÑADIR AL CARRITO", color = Black, fontWeight = FontWeight.Bold)
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     modifier = Modifier

@@ -1,24 +1,22 @@
 package com.example.levelup_gamer.ui.admin
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.levelup_gamer.data.models.Product
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.example.levelup_gamer.data.repository.ProductRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
 class AdminViewModel : ViewModel() {
-    private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products = _products.asStateFlow()
-
-    init {
-        // Cargar productos de ejemplo
-        _products.value = listOf(
-            Product(id = "1", name = "Teclado Gamer", category = "Periféricos", price = "75.99"),
-            Product(id = "2", name = "Mouse Inalámbrico", category = "Periféricos", price = "45.50"),
-            Product(id = "3", name = "Monitor 24 pulgadas", category = "Monitores", price = "250.00")
+    val products: StateFlow<List<Product>> = ProductRepository.products
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
         )
-    }
 
     fun deleteProduct(productId: String) {
-        _products.value = _products.value.filterNot { it.id == productId }
+        ProductRepository.deleteProduct(productId)
     }
 }

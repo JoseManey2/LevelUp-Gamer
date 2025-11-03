@@ -27,10 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.levelup_gamer.data.models.Product
 
 @Composable
-fun AdminScreen(adminViewModel: AdminViewModel = viewModel()) {
+fun AdminScreen(navController: NavController, adminViewModel: AdminViewModel = viewModel()) {
     val products by adminViewModel.products.collectAsState()
 
     Scaffold(

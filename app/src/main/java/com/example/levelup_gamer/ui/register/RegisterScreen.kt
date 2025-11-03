@@ -120,7 +120,7 @@ fun RegisterScreen(
                 when (uiState.currentStep) {
                     1 -> Step1Content(registerViewModel, uiState)
                     2 -> Step2Content(registerViewModel, uiState)
-                    3 -> Step3Content(registerViewModel, uiState)
+                    3 -> Step3Content(registerViewModel, uiState, navController)
                 }
             }
 
@@ -392,7 +392,7 @@ fun Step2Content(viewModel: RegisterViewModel, uiState: RegistrationUiState) {
 }
 
 @Composable
-fun Step3Content(viewModel: RegisterViewModel, uiState: RegistrationUiState) {
+fun Step3Content(viewModel: RegisterViewModel, uiState: RegistrationUiState, navController: NavController) {
     val imagePicker = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         viewModel.onProfileImageChange(uri)
     }
@@ -443,14 +443,14 @@ fun Step3Content(viewModel: RegisterViewModel, uiState: RegistrationUiState) {
             Text("Registrar", fontSize = 18.sp, color = White)
         }
         Button(
-            onClick = { viewModel.completeRegistration() },
+            onClick = { navController.navigate("home") { popUpTo("welcome") } },
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = ElectricBlue),
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .height(50.dp)
         ) {
-            Text("Omitir", fontSize = 18.sp, color = White)
+            Text("Omitir Ultimo Paso", fontSize = 18.sp, color = White)
         }
     }
 }
