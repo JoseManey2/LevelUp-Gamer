@@ -1,5 +1,6 @@
 package com.example.levelup_gamer.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -146,15 +148,15 @@ fun ProductItem(product: Product, onClick: () -> Unit) {
 
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
+            Image(
+                painter = painterResource(id = product.imageUrl),
+                contentDescription = product.name,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .height(150.dp)
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(ElectricBlue) // Placeholder for image
-            ) {
-                Text("IMAGEN DEL PRODUCTO", color = Color.White, modifier = Modifier.align(Alignment.Center))
-            }
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Column(
                 modifier = Modifier

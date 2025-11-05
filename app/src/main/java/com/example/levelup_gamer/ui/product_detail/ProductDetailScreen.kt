@@ -1,5 +1,6 @@
 package com.example.levelup_gamer.ui.product_detail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -114,10 +116,15 @@ fun ProductDetailScreen(
                         .fillMaxWidth()
                         .height(300.dp)
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(ElectricBlue)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("IMAGEN/ES DEL PRODUCTO", color = Color.White, modifier = Modifier.align(Alignment.Center))
+                    Image(
+                        painter = painterResource(id = product.imageUrl),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
