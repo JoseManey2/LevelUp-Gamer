@@ -14,18 +14,21 @@ import kotlinx.coroutines.flow.stateIn
 
 data class ProductDetailUiState(
     val product: Product? = null,
-    val showAddedToCartPopup: Boolean = false
+    val showAddedToCartPopup: Boolean = false,
+    val quantity: Int = 1
 )
 
 class ProductDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val productId: String = checkNotNull(savedStateHandle["productId"])
     private val _showAddedToCartPopup = MutableStateFlow(false)
+    private val _quantity = MutableStateFlow(1)
 
     val uiState: StateFlow<ProductDetailUiState> = 
-        combine(ProductRepository.products, _showAddedToCartPopup) { products, showPopup ->
+        combine(ProductRepository.products, _showAddedToCartPopup, _quantity) { products, showPopup, quantity ->
             ProductDetailUiState(
                 product = products.find { it.id == productId },
-                showAddedToCartPopup = showPopup
+                showAddedToCartPopup = showPopup,
+                quantity = quantity
             )
         }
         .stateIn(
@@ -34,9 +37,15 @@ class ProductDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
             initialValue = ProductDetailUiState()
         )
 
+    fun onQuantityChanged(newQuantity: Int) {
+        if (newQuantity > 0) {
+            _quantity.value = newQuantity
+        }
+    }
+
     fun addToCart() {
         uiState.value.product?.let {
-            CartRepository.addToCart(it)
+            CartRepository.addToCart(it, _quantity.value)
             _showAddedToCartPopup.value = true
         }
     }

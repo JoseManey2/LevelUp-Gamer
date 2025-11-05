@@ -1,20 +1,27 @@
 package com.example.levelup_gamer.ui.product_detail
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -30,15 +37,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +63,10 @@ import com.example.levelup_gamer.ui.home.BottomNavigationBar
 import com.example.levelup_gamer.ui.theme.Black
 import com.example.levelup_gamer.ui.theme.ElectricBlue
 import com.example.levelup_gamer.ui.theme.NeonGreen
+import com.example.levelup_gamer.ui.theme.White
 import com.example.levelup_gamer.ui.theme.orbitron
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +96,13 @@ fun ProductDetailScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     if (product != null) {
-                        Text(text = product.name, fontFamily = orbitron, color = NeonGreen)
+                        Text(
+                            text = product.name, 
+                            fontFamily = orbitron, 
+                            color = NeonGreen,
+                            maxLines = 2,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 },
                 navigationIcon = {
@@ -111,19 +134,37 @@ fun ProductDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .padding(16.dp)
-                        .clip(RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = product.imageUrl),
-                        contentDescription = product.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                val listState = rememberLazyListState()
+                var currentPage by remember { mutableStateOf(0) }
+
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.firstVisibleItemIndex }
+                        .distinctUntilChanged()
+                        .map { index -> currentPage = index }
+                        .collect {}
+                }
+
+                Box(contentAlignment = Alignment.TopCenter) {
+                    LazyRow(
+                        state = listState,
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        itemsIndexed(product.imageUrls) { _, imageUrl ->
+                            Image(
+                                painter = painterResource(id = getDrawableResourceId(imageName = imageUrl, context = LocalContext.current)),
+                                contentDescription = product.name,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .height(300.dp)
+                                    .padding(horizontal = 4.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                        }
+                    }
+                    Text(
+                        text = "${currentPage + 1}/${product.imageUrls.size}",
+                        color = White,
+                        modifier = Modifier.background(Color.Black.copy(alpha = 0.5f)).padding(8.dp).clip(RoundedCornerShape(8.dp))
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -131,11 +172,14 @@ fun ProductDetailScreen(
                     text = product.name,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = White,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     if (product.discountedPrice != null) {
                         Text(
                             text = "${product.price}",
@@ -158,11 +202,31 @@ fun ProductDetailScreen(
                             fontSize = 20.sp
                         )
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (product.stock > 0) {
+                        Text("Producto en Stock", color = NeonGreen)
+                    } else {
+                        Text("Agotado", color = Color.Red)
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Cantidad:", color = White, fontSize = 18.sp)
+                    IconButton(onClick = { productDetailViewModel.onQuantityChanged(uiState.quantity - 1) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Remove one", tint = White)
+                    }
+                    Text(uiState.quantity.toString(), color = White, fontSize = 18.sp)
+                    IconButton(onClick = { productDetailViewModel.onQuantityChanged(uiState.quantity + 1) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add one", tint = White)
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = product.description,
-                    color = Color.White,
+                    color = White,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -172,7 +236,8 @@ fun ProductDetailScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                    enabled = product.stock > 0
                 ) {
                     Text("AÑADIR AL CARRITO", color = Black, fontWeight = FontWeight.Bold)
                 }
@@ -185,11 +250,11 @@ fun ProductDetailScreen(
                     colors = CardDefaults.cardColors(containerColor = ElectricBlue)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Detalles del Producto", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Detalles del Producto", fontWeight = FontWeight.Bold, color = White)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Categoría: ${product.category}", color = Color.White)
-                        Text("Tipo: --", color = Color.White)
-                        Text("Formato Disponible: --", color = Color.White)
+                        Text("Categoría: ${product.category}", color = White)
+                        Text("Tipo: --", color = White)
+                        Text("Formato Disponible: --", color = White)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -201,7 +266,7 @@ fun ProductDetailScreen(
                     colors = CardDefaults.cardColors(containerColor = ElectricBlue)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Reseñas del Producto", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Reseñas del Producto", fontWeight = FontWeight.Bold, color = White)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Star, contentDescription = "Star", tint = Color.Yellow)
@@ -211,11 +276,16 @@ fun ProductDetailScreen(
                             Icon(Icons.Default.Star, contentDescription = "Star", tint = Color.Gray)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Nombre de la persona", color = Color.White)
-                        Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. sed", color = Color.White)
+                        Text("Nombre de la persona", color = White)
+                        Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. sed", color = White)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun getDrawableResourceId(imageName: String, context: Context): Int {
+    return context.resources.getIdentifier(imageName, "drawable", context.packageName)
 }
