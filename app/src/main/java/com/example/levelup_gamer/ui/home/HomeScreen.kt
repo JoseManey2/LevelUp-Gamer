@@ -64,6 +64,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.levelup_gamer.R
 import com.example.levelup_gamer.data.models.Product
+import com.example.levelup_gamer.ui.AppViewModelProvider
 import com.example.levelup_gamer.ui.navigation.AppDrawer
 import com.example.levelup_gamer.ui.theme.Black
 import com.example.levelup_gamer.ui.theme.ElectricBlue
@@ -73,7 +74,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavController, 
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
     val uiState by homeViewModel.uiState.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -93,7 +97,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = view
                             value = uiState.searchQuery,
                             onValueChange = { homeViewModel.onSearchQueryChange(it) },
                             placeholder = { Text("Buscar productos") },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
                             shape = RoundedCornerShape(25.dp),
                             colors = TextFieldDefaults.colors(
                                 focusedIndicatorColor = Color.Transparent,
@@ -238,7 +242,7 @@ fun BottomNavigationBar(navController: NavController) {
 
     NavigationBar(containerColor = Black) {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home", tint = NeonGreen) },
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Home", tint = NeonGreen) },
             selected = currentRoute == "home",
             onClick = { 
                 navController.navigate("home") {
@@ -258,7 +262,7 @@ fun BottomNavigationBar(navController: NavController) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile", tint = NeonGreen) },
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile", tint = NeonGreen) },
             selected = currentRoute == "profile",
             onClick = { 
                 navController.navigate("profile") {
@@ -268,7 +272,7 @@ fun BottomNavigationBar(navController: NavController) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Cart", tint = NeonGreen) },
+            icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Cart", tint = NeonGreen) },
             selected = currentRoute == "cart",
             onClick = { 
                 navController.navigate("cart") {
@@ -278,7 +282,7 @@ fun BottomNavigationBar(navController: NavController) {
             }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings", tint = NeonGreen) },
+            icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings", tint = NeonGreen) },
             selected = currentRoute == "settings",
             onClick = { 
                 navController.navigate("settings") {

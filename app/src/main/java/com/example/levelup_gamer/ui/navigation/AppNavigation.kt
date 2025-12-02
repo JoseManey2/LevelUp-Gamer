@@ -7,14 +7,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.levelup_gamer.ui.AppViewModelProvider
 import com.example.levelup_gamer.ui.UserProfile.UserProfileScreen
 import com.example.levelup_gamer.ui.admin.AdminScreen
+import com.example.levelup_gamer.ui.admin.GestionarProductosScreen
 import com.example.levelup_gamer.ui.cart.ShoppingCartScreen
 import com.example.levelup_gamer.ui.discounts.DiscountScreen
 import com.example.levelup_gamer.ui.home.HomeScreen
 import com.example.levelup_gamer.ui.login.LoginScreen
 import com.example.levelup_gamer.ui.product_detail.ProductDetailScreen
-import com.example.levelup_gamer.ui.product_detail.ProductDetailViewModel
 import com.example.levelup_gamer.ui.register.RegisterScreen
 import com.example.levelup_gamer.ui.settings.SettingsScreen
 import com.example.levelup_gamer.ui.welcome.WelcomeScreen
@@ -39,10 +40,14 @@ fun AppNavigation() {
             route = "productDetail/{productId}",
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
         ) {
-            ProductDetailScreen(navController = navController, productDetailViewModel = viewModel())
+            // This line is now corrected to use the factory
+            ProductDetailScreen(navController = navController, productDetailViewModel = viewModel(factory = AppViewModelProvider.Factory))
         }
         composable("admin") {
             AdminScreen(navController = navController)
+        }
+        composable("gestionar_productos") {
+            GestionarProductosScreen(navController = navController)
         }
         composable("discounts") {
             DiscountScreen(navController = navController)

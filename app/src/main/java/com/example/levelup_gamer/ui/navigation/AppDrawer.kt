@@ -2,10 +2,13 @@ package com.example.levelup_gamer.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -33,7 +36,7 @@ fun AppDrawer(
                 navController.navigate("home")
                 scope.launch { drawerState.close() }
             },
-            icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") }
         )
         NavigationDrawerItem(
             label = { Text("Ofertas") },
@@ -51,7 +54,7 @@ fun AppDrawer(
                 navController.navigate("profile")
                 scope.launch { drawerState.close() }
             },
-            icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") }
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") }
         )
         NavigationDrawerItem(
             label = { Text("Carrito") },
@@ -60,7 +63,7 @@ fun AppDrawer(
                 navController.navigate("cart")
                 scope.launch { drawerState.close() }
             },
-            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito") }
+            icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") }
         )
         NavigationDrawerItem(
             label = { Text("Configuración") },
@@ -69,7 +72,27 @@ fun AppDrawer(
                 navController.navigate("settings")
                 scope.launch { drawerState.close() }
             },
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") }
+            icon = { Icon(Icons.Filled.Settings, contentDescription = "Configuración") }
+        )
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        Text("Admin", modifier = Modifier.padding(16.dp))
+        NavigationDrawerItem(
+            label = { Text("Ver Productos") },
+            selected = false,
+            onClick = { 
+                navController.navigate("admin")
+                scope.launch { drawerState.close() }
+            },
+            icon = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = "Admin") }
+        )
+        NavigationDrawerItem(
+            label = { Text("Gestionar Productos") },
+            selected = false,
+            onClick = { 
+                navController.navigate("gestionar_productos")
+                scope.launch { drawerState.close() }
+            },
+            icon = { Icon(Icons.Filled.CloudDownload, contentDescription = "Gestionar Productos") }
         )
     }
 }

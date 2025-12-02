@@ -10,23 +10,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 
 data class ProductDetailUiState(
+    // Product can be null if not found
     val product: Product? = null,
     val showAddedToCartPopup: Boolean = false,
     val quantity: Int = 1
 )
 
-class ProductDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
+class ProductDetailViewModel(
+    productRepository: ProductRepository,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
     private val productId: String = checkNotNull(savedStateHandle["productId"])
     private val _showAddedToCartPopup = MutableStateFlow(false)
     private val _quantity = MutableStateFlow(1)
 
+    // The flow from the repository can now emit null
+    private val _productFlow = productRepository.getProductById(productId)
+
     val uiState: StateFlow<ProductDetailUiState> = 
-        combine(ProductRepository.products, _showAddedToCartPopup, _quantity) { products, showPopup, quantity ->
+        combine(_productFlow, _showAddedToCartPopup, _quantity) { product, showPopup, quantity ->
             ProductDetailUiState(
-                product = products.find { it.id == productId },
+                product = product,
                 showAddedToCartPopup = showPopup,
                 quantity = quantity
             )

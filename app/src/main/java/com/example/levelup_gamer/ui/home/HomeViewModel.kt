@@ -17,12 +17,13 @@ data class HomeUiState(
     val selectedCategory: String? = null
 )
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(productRepository: ProductRepository) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     private val _selectedCategory = MutableStateFlow<String?>(null)
 
+    // Reverted to a simpler and more stable implementation
     val uiState: StateFlow<HomeUiState> = combine(
-        ProductRepository.products,
+        productRepository.products,
         _searchQuery,
         _selectedCategory
     ) { allProducts, query, category ->
@@ -31,14 +32,16 @@ class HomeViewModel : ViewModel() {
         } else {
             allProducts
         }
+
         val searchedProducts = if (query.isNotBlank()) {
             productsToShow.filter { it.name.contains(query, ignoreCase = true) }
         } else {
             productsToShow
         }
+
         HomeUiState(
             products = searchedProducts,
-            categories = allProducts.map { it.category }.distinct(),
+            categories = allProducts.map { it.category }.distinct().sorted(),
             searchQuery = query,
             selectedCategory = category
         )

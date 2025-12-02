@@ -13,9 +13,9 @@ data class DiscountUiState(
     val discountedProducts: List<Product> = emptyList()
 )
 
-class DiscountViewModel : ViewModel() {
+class DiscountViewModel(productRepository: ProductRepository) : ViewModel() {
     val uiState: StateFlow<DiscountUiState> = 
-        ProductRepository.products
+        productRepository.products
             .map { allProducts ->
                 DiscountUiState(discountedProducts = allProducts.filter { it.discountedPrice != null })
             }

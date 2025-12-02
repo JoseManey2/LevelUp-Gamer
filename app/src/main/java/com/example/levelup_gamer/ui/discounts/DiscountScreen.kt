@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.levelup_gamer.R
+import com.example.levelup_gamer.ui.AppViewModelProvider
 import com.example.levelup_gamer.ui.home.BottomNavigationBar
 import com.example.levelup_gamer.ui.home.ProductItem
 import com.example.levelup_gamer.ui.navigation.AppDrawer
@@ -39,7 +40,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DiscountScreen(
     navController: NavController,
-    discountViewModel: DiscountViewModel = viewModel()
+    discountViewModel: DiscountViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val uiState by discountViewModel.uiState.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
